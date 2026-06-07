@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, ForeignKey, Text
-from sqlalchemy.dialects.mssql import DateTime
 from sqlalchemy.orm import relationship
 from database import Base
 from sqlalchemy import Column, Integer, String, DateTime

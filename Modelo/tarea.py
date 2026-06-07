@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Text
-from sqlalchemy.dialects.mssql import DateTime  # <-- IMPORTANTE: Importamos el DATETIME clásico de SQL Server
 from sqlalchemy.orm import relationship
 from database import Base
 from sqlalchemy import Column, Integer, String, DateTime
