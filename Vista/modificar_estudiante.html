@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlgeVisual - Modificar Alumno</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body style="display: block;">
+
+    <div class="dashboard-header">
+        <h2>AlgeVisual</h2>
+        <div>
+            <span>Bienvenido, <strong>{{ session['nombre'] }}</strong> ({{ session['rol'] }})</span>
+            <a href="/logout" class="btn-cerrar">Cerrar Sesión</a>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <h3>Usuarios</h3>
+            <a href="/estudiantes" style="background-color: #e8f0fe; color: #1a73e8; font-weight: bold;">Estudiantes</a>
+            <a href="#">Docentes</a>
+            <h3>Gestión Escolar</h3>
+            <a href="#">Grupos</a>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <a href="/estudiantes" style="color: #666;">← Volver a Gestión</a>
+        </div>
+
+        <div class="main-content">
+            <h1 style="color: #1a73e8; margin: 0 0 5px 0;">Modificar Datos del Estudiante</h1>
+            <p style="color: #666; margin: 0 0 25px 0;">Actualiza la información de <strong>{{ alumno.NombreCompleto }}</strong></p>
+
+            <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); max-width: 500px;">
+                <form action="/estudiantes/modificar/{{ alumno.ID_Usuario }}" method="POST">
+                    
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Nombre Completo</label>
+                    <input type="text" name="nombre" value="{{ alumno.NombreCompleto }}" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Matrícula</label>
+                    <input type="text" name="matricula" value="{{ alumno.Matricula }}" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Correo Institucional</label>
+                    <input type="email" name="correo" value="{{ alumno.Correo }}" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #333;">Nueva Contraseña (Opcional)</label>
+                    <input type="password" name="contrasena" placeholder="Deja en blanco para conservar la actual" style="width: 100%; padding: 10px; margin-bottom: 25px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 14px;">
+
+                    <button type="submit" style="margin: 0; background-color: #fbbc04; color: #333;">Guardar Cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

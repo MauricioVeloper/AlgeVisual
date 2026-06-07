@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ actividad.Titulo }} - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; margin: 0; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; }
+        .header { background: #0f172a; color: white; padding: 30px; text-align: center; position: relative; }
+        .content { padding: 40px; }
+        
+        .timer-box { position: sticky; top: 20px; background: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; text-align: center; font-size: 24px; font-weight: bold; border: 2px solid #fca5a5; margin-bottom: 30px; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.1);}
+        
+        .question-card { margin-bottom: 30px; border-bottom: 1px solid #e2e8f0; padding-bottom: 20px; }
+        .question-title { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 15px; }
+        
+        .option-label { display: block; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; font-size: 14px; }
+        .option-label:hover { background: #f8fafc; border-color: #94a3b8; }
+        .option-label input { margin-right: 10px; }
+        
+        .btn-start { background: #0284c7; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; width: 100%; transition: 0.2s; }
+        .btn-start:hover { background: #0369a1; }
+        
+        .btn-finish { background: #16a34a; color: white; border: none; padding: 15px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.2s; }
+        .btn-finish:hover { background: #15803d; }
+        .resultado-alto { color: #16a34a; }
+        .resultado-bajo { color: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div id="examen-config" data-tiempo="{{ actividad.TiempoMinutos }}" data-id="{{ actividad.ID_Actividad }}" style="display: none;"></div>
+
+    <div class="container">
+        <div class="header">
+            <a href="/grupo/{{ actividad.ID_Grupo }}" style="position: absolute; left: 30px; top: 30px; color: white; text-decoration: none;"><i class="fa-solid fa-arrow-left"></i> Volver</a>
+            <h1 style="margin: 0; font-size: 24px;">{{ actividad.Titulo }}</h1>
+            <p style="margin: 10px 0 0 0; color: #94a3b8;">{{ actividad.grupo.Nombre }}</p>
+        </div>
+
+        <div class="content">
+            
+            {% if session['rol'] == 'Estudiante' %}
+                
+                {% if mi_calificacion %}
+                    <div style="text-align: center; padding: 40px 0;">
+                        <i class="fa-solid fa-ranking-star" style="font-size: 60px; color: #f59e0b; margin-bottom: 20px;"></i>
+                        <h2 style="color: #0f172a; margin-bottom: 10px;">¡Examen Completado!</h2>
+                        <div style="display: inline-block; background: #f0fdf4; border: 2px solid #4ade80; color: #16a34a; padding: 15px 30px; border-radius: 12px; font-size: 24px; font-weight: bold; margin: 20px 0;">
+                            Calificación: {{ mi_calificacion.Puntuacion|int }} / 100
+                        </div>
+                        <p style="color: #64748b; font-size: 14px;">{{ mi_calificacion.Retroalimentacion }}</p>
+                    </div>
+                {% else %}
+                    <div id="pantalla-lobby">
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
+                            <h3 style="color: #b45309; margin-top: 0;"><i class="fa-solid fa-triangle-exclamation"></i> Instrucciones Importantes</h3>
+                            <ul style="color: #475569; font-size: 14px; line-height: 1.6; padding-left: 20px;">
+                                <li>Tienes <strong>{{ actividad.TiempoMinutos }} minutos</strong> para completar el examen.</li>
+                                <li>El cronómetro comenzará en cuanto presiones el botón.</li>
+                                <li>Si el tiempo se agota, el examen se enviará automáticamente con lo que hayas contestado.</li>
+                                <li>No cierres ni recargues esta página durante la prueba.</li>
+                            </ul>
+                        </div>
+                        <button class="btn-start" onclick="iniciarExamen()"><i class="fa-solid fa-play"></i> Comenzar Examen Ahora</button>
+                    </div>
+
+                    <div id="pantalla-examen" style="display: none;">
+                        <div class="timer-box" id="reloj">
+                            <i class="fa-regular fa-clock"></i> <span id="tiempo-texto">--:--</span>
+                        </div>
+
+                        <form id="formulario-examen">
+                            {% for preg in actividad.preguntas %}
+                            <div class="question-card">
+                                <div class="question-title">{{ loop.index }}. {{ preg.TextoPregunta }}</div>
+                                {% for op in preg.opciones %}
+                                    <label class="option-label">
+                                        <input type="radio" name="preg-{{ preg.ID_Pregunta }}" value="{{ op.ID_Opcion }}">
+                                        {{ op.TextoOpcion }}
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                            <button type="button" class="btn-finish" onclick="enviarExamen()"><i class="fa-solid fa-check-double"></i> Terminar y Enviar Respuestas</button>
+                        </form>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <h3 style="color: #0f172a; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Resultados de Alumnos</h3>
+                {% if calificaciones %}
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        {% for calif in calificaciones %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <div>
+                                <p style="font-weight: 600; color: #0f172a; margin: 0;">{{ calif.estudiante.NombreCompleto }}</p>
+                                <p style="font-size: 12px; color: #64748b; margin: 5px 0 0 0;">{{ calif.FechaCalificacion.strftime('%d/%m/%Y %H:%M') }}</p>
+                            </div>
+                            <div class="resultado-valor {% if calif.Puntuacion >= 70 %}resultado-alto{% else %}resultado-bajo{% endif %}" style="font-weight: bold; font-size: 16px;">
+                                {{ calif.Puntuacion|int }} / 100
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: #64748b; font-style: italic;">Ningún alumno ha realizado este examen todavía.</p>
+                {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    <script>
+        // Leemos la configuración desde el HTML usando JavaScript puro (Sin errores de editor)
+        const configElement = document.getElementById('examen-config');
+        const idActividad = configElement ? configElement.dataset.id : 0;
+        let tiempoRestante = configElement ? parseInt(configElement.dataset.tiempo) * 60 : 0;
+        let intervalo;
+        let enviando = false;
+
+        function iniciarExamen() {
+            document.getElementById('pantalla-lobby').style.display = 'none';
+            document.getElementById('pantalla-examen').style.display = 'block';
+            actualizarReloj();
+            intervalo = setInterval(actualizarReloj, 1000);
+        }
+
+        function actualizarReloj() {
+            if(tiempoRestante <= 0) {
+                clearInterval(intervalo);
+                document.getElementById('tiempo-texto').innerText = "00:00";
+                alert("¡Se agotó el tiempo! Tus respuestas serán enviadas automáticamente.");
+                enviarExamen();
+                return;
+            }
+            
+            let minutos = Math.floor(tiempoRestante / 60);
+            let segundos = tiempoRestante % 60;
+            document.getElementById('tiempo-texto').innerText = 
+                `${minutos < 10 ? '0' : ''}${minutos}:${segundos < 10 ? '0' : ''}${segundos}`;
+            
+            tiempoRestante--;
+        }
+
+        async function enviarExamen() {
+            if(enviando) return;
+            enviando = true;
+            clearInterval(intervalo);
+            document.querySelector('.btn-finish').innerText = "Evaluando...";
+
+            // Recopilamos las respuestas seleccionadas escaneando el formulario
+            let respuestas = {};
+            const formData = new FormData(document.getElementById('formulario-examen'));
+            
+            for (let [name, value] of formData.entries()) {
+                if (name.startsWith('preg-')) {
+                    let idPregunta = name.split('-')[1];
+                    respuestas[idPregunta] = value;
+                }
+            }
+
+            try {
+                const response = await fetch('/api/actividad/' + idActividad + '/evaluar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ respuestas: respuestas })
+                });
+
+                if (response.ok) {
+                    window.location.reload(); // Recarga y muestra el resultado final
+                } else {
+                    const err = await response.json();
+                    alert("Hubo un error al guardar tu calificación: " + (err.error || ""));
+                    enviando = false;
+                    document.querySelector('.btn-finish').innerText = "Reintentar Envío";
+                }
+            } catch(e) {
+                alert("Error de conexión. Revisa tu internet.");
+                enviando = false;
+                document.querySelector('.btn-finish').innerText = "Reintentar Envío";
+            }
+        }
+    </script>
+</body>
+</html>

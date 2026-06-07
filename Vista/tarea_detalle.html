@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ tarea.Titulo }} - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; display: flex; height: 100vh; color: #334155; overflow: hidden; }
+        
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .top-navbar { height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; padding: 0 40px; flex-shrink: 0; }
+        
+        /* Ajuste de dimensiones para que no se vea amontonado */
+        .content-area { padding: 40px; flex-grow: 1; overflow-y: auto; display: flex; gap: 40px; justify-content: center; align-items: flex-start; flex-wrap: wrap;}
+        
+        .task-details { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 40px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); flex-basis: 60%; min-width: 500px; flex-grow: 1; max-width: 900px;}
+        .task-submission { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 35px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); flex-basis: 30%; min-width: 350px; flex-grow: 1; max-width: 500px;}
+        
+        .header-icon { width: 55px; height: 55px; background-color: #0284c7; color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 25px;}
+        .attachment-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-top: 20px; background-color: #f8fafc;}
+        .attachment-box img { max-width: 100%; border-radius: 6px; margin-top: 15px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .btn-upload { background-color: #16a34a; color: white; border: none; padding: 14px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; transition: 0.2s; font-size: 15px;}
+        .btn-upload:hover { background-color: #15803d; }
+        
+        /* Estilos para la lista de entregas del Docente */
+        .student-delivery { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; transition: background 0.2s;}
+        .student-delivery:hover { background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <a href="/grupo/{{ tarea.ID_Grupo }}" style="color: #64748b; font-size: 20px; text-decoration: none; margin-right: 15px;"><i class="fa-solid fa-arrow-left"></i></a>
+            <h1 style="font-size: 18px; color: #0f172a; font-weight: 600;">{{ tarea.grupo.Nombre }}</h1>
+        </header>
+        
+        <div class="content-area">
+            
+            <div class="task-details">
+                <div class="header-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+                <h1 style="color: #0f172a; font-size: 28px; margin-bottom: 12px;">{{ tarea.Titulo }}</h1>
+                <p style="color: #64748b; font-size: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 25px; margin-bottom: 25px;">
+                    Publicado por {{ tarea.grupo.docente.usuario.NombreCompleto }} • <strong>Vence: {{ tarea.FechaLimite.strftime('%d/%m/%Y a las %H:%M') }}</strong>
+                </p>
+                
+                <div style="color: #334155; font-size: 16px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 30px;">{{ tarea.Descripcion or 'Sin instrucciones adicionales.' }}</div>
+                
+                {% if tarea.ArchivosAdicionales %}
+                <h4 style="color: #0f172a; margin-bottom: 15px; font-size: 16px;"><i class="fa-solid fa-paperclip" style="color: #0284c7;"></i> Material adjunto del profesor</h4>
+                <div class="attachment-box">
+                    <a href="{{ url_for('static', filename='uploads/tareas/' + tarea.ArchivosAdicionales) }}" target="_blank" style="text-decoration: none; color: #0284c7; font-weight: 600; display: block;">
+                        <i class="fa-regular fa-image"></i> {{ tarea.ArchivosAdicionales }} (Clic para ver completo)
+                    </a>
+                    <img src="{{ url_for('static', filename='uploads/tareas/' + tarea.ArchivosAdicionales) }}" alt="Material de apoyo">
+                </div>
+                {% endif %}
+
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 35px 0 20px 0;">
+                <h4 style="color: #0f172a; margin-bottom: 15px; font-size: 16px;"><i class="fa-regular fa-comments" style="color: #0284c7;"></i> Avisos y Comentarios del Profesor</h4>
+
+                <div style="display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px;">
+                    {% if comentarios %}
+                        {% for com in comentarios %}
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; border-left: 3px solid #0284c7;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <strong style="color: #0f172a; font-size: 13px;">{{ com.autor.NombreCompleto }} <span style="background: #e0f2fe; color: #0284c7; font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px;">Docente</span></strong>
+                                <span style="font-size: 12px; color: #64748b;">{{ com.Fecha.strftime('%d/%m/%Y a las %H:%M') }}</span>
+                            </div>
+                            <p style="color: #334155; font-size: 14px; margin: 0; white-space: pre-wrap;">{{ com.Contenido }}</p>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size: 13px; color: #94a3b8; font-style: italic;">No hay comentarios ni avisos adicionales en esta tarea.</p>
+                    {% endif %}
+                </div>
+
+                {% if session['rol'] == 'Docente' %}
+                <form action="/tarea/{{ tarea.ID_Tarea }}/comentar" method="POST" style="margin-top: 15px; background: white; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                    <textarea name="contenido" rows="2" placeholder="Escribe un aviso para toda la clase (Ej. 'Chicos, no olviden el formato APA')..." required style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; resize: vertical; margin-bottom: 10px; outline: none;"></textarea>
+                    <div style="text-align: right;">
+                        <button type="submit" style="background-color: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: 0.2s;"><i class="fa-solid fa-paper-plane"></i> Publicar Aviso</button>
+                    </div>
+                </form>
+                {% endif %}
+
+            </div>
+
+            <!-- DERECHA: Panel de Interacción (Cambia según el ROL) -->
+            <div class="task-submission">
+                
+                <!-- ================== VISTA ESTUDIANTE ================== -->
+                {% if session['rol'] == 'Estudiante' %}
+                    <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">Tu trabajo</h3>
+                    
+                    {% if mi_entrega %}
+                        <!-- ESTADO: ENTREGADO -->
+                        <div style="text-align: center; color: #16a34a; margin-bottom: 20px; padding: 20px; background: #f0fdf4; border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check" style="font-size: 45px; margin-bottom: 15px;"></i>
+                            <p style="font-weight: bold; font-size: 16px;">¡Tarea Entregada!</p>
+                            <p style="font-size: 13px; color: #15803d; margin-top: 5px;">El {{ mi_entrega.FechaHoraEntrega.strftime('%d/%m/%Y a las %H:%M') }}</p>
+                        </div>
+                        
+                        <!-- Mostramos todos los archivos separados -->
+                        <h4 style="font-size: 13px; margin-bottom: 10px; color: #475569;">Archivos adjuntos:</h4>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 25px;">
+                            {% set archivos = mi_entrega.ArchivoURL.split('|') %}
+                            {% for arch in archivos %}
+                                <a href="{{ url_for('static', filename='uploads/entregas/' + arch) }}" target="_blank" class="btn-upload" style="background-color: #f8fafc; color: #0284c7; border: 1px solid #cbd5e1; display: block; text-align: left; text-decoration: none; font-size: 13px;">
+                                    <i class="fa-solid fa-file-image" style="margin-right: 8px;"></i> Evidencia {{ loop.index }}
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="toggleModificarEntrega()" style="flex: 1; background-color: white; color: #0f172a; border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;">
+                                <i class="fa-solid fa-pen"></i> Modificar
+                            </button>
+                            <form action="/tarea/{{ tarea.ID_Tarea }}/eliminar_entrega" method="POST" style="flex: 1; margin: 0;">
+                                <button type="submit" onclick="return confirm('¿Estás seguro de cancelar tu entrega? Se marcará como No Entregada en todos lados.');" style="width: 100%; background-color: white; color: #dc2626; border: 1px solid #fca5a5; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 13px;">
+                                    <i class="fa-solid fa-trash"></i> Eliminar
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Formulario Oculto para Modificar -->
+                        <div id="form-modificar" style="display: none; margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+                            <p style="font-size: 12px; color: #64748b; margin-bottom: 15px; line-height: 1.4;"><i class="fa-solid fa-circle-info"></i> Selecciona tus nuevos archivos. Al guardar, estos <strong>reemplazarán</strong> a los anteriores.</p>
+                            <form action="/tarea/{{ tarea.ID_Tarea }}/entregar" method="POST" enctype="multipart/form-data">
+                                <div style="border: 2px dashed #cbd5e1; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 15px; background-color: #f8fafc;">
+                                    <!-- Aquí agregamos 'multiple' para dejar subir varios -->
+                                    <input type="file" name="archivo_entrega" accept=".jpg, .jpeg" multiple required style="width: 100%; font-size: 13px;">
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" onclick="toggleModificarEntrega()" style="flex: 1; background-color: #f1f5f9; color: #475569; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">Cancelar</button>
+                                    <button type="submit" class="btn-upload" style="flex: 2; margin-top: 0;">Actualizar Archivos</button>
+                                </div>
+                            </form>
+                        </div>
+
+                    {% else %}
+                        <!-- ESTADO: PENDIENTE -->
+                        <p style="font-size: 14px; color: #dc2626; margin-bottom: 20px; font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> Estado: Sin entregar</p>
+                        
+                        <form action="/tarea/{{ tarea.ID_Tarea }}/entregar" method="POST" enctype="multipart/form-data">
+                            <div style="border: 2px dashed #cbd5e1; padding: 30px 20px; text-align: center; border-radius: 8px; margin-bottom: 20px; background-color: #f8fafc;">
+                                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 35px; color: #94a3b8; margin-bottom: 15px;"></i>
+                                <p style="font-size: 13px; color: #475569; margin-bottom: 15px;">Selecciona una o más evidencias en formato <strong>.JPG</strong></p>
+                                <!-- Aquí agregamos 'multiple' para dejar subir varios -->
+                                <input type="file" name="archivo_entrega" accept=".jpg, .jpeg" multiple required style="width: 100%; font-size: 13px;">
+                            </div>
+                            <button type="submit" class="btn-upload"><i class="fa-solid fa-upload"></i> Subir Entrega</button>
+                        </form>
+                    {% endif %}
+
+                <!-- ================== VISTA DOCENTE ================== -->
+                {% elif session['rol'] == 'Docente' %}
+                    <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">Entregas de Alumnos</h3>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        {% if entregas %}
+
+                            {% for entrega in entregas %}
+                            <div class="student-delivery" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                                <div>
+                                    <p style="font-weight: 600; color: #0f172a; font-size: 14px;">{{ entrega.estudiante.NombreCompleto }}</p>
+                                    <p style="font-size: 12px; color: #64748b; margin-top: 3px;"><i class="fa-regular fa-clock"></i> {{ entrega.FechaHoraEntrega.strftime('%d/%m/%Y a las %H:%M') }}</p>
+                                </div>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px;">
+                                    {% set archivos_doc = entrega.ArchivoURL.split('|') %}
+                                    {% for arch in archivos_doc %}
+                                        <a href="{{ url_for('static', filename='uploads/entregas/' + arch) }}" target="_blank" style="background-color: #e0f2fe; color: #0284c7; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #bae6fd;">
+                                            <i class="fa-solid fa-image"></i> Archivo {{ loop.index }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        {% if entrega.ID_Estudiante in notas %}
+                                            <span style="color: #16a34a; font-weight: bold; font-size: 13px;"><i class="fa-solid fa-check-double"></i> Calificado: {{ notas[entrega.ID_Estudiante].Puntuacion }}/100</span>
+                                        {% else %}
+                                            <span style="color: #f59e0b; font-weight: bold; font-size: 13px;"><i class="fa-solid fa-clock"></i> Pendiente de revisar</span>
+                                        {% endif %}
+                                    </div>
+                                    <button onclick="toggleCalificar('{{ entrega.ID_Estudiante }}')" style="background-color: #0f172a; color: white; padding: 6px 12px; border-radius: 6px; border: none; font-size: 12px; font-weight: bold; cursor: pointer; transition: 0.2s;">
+                                        <i class="fa-solid fa-star"></i> Evaluar
+                                    </button>
+                                </div>
+
+                                <div id="form-calificar-{{ entrega.ID_Estudiante }}" style="display: none; margin-top: 10px; background-color: #f1f5f9; padding: 15px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                    <form action="/tarea/{{ tarea.ID_Tarea }}/calificar/{{ entrega.ID_Estudiante }}" method="POST">
+                                        <div style="margin-bottom: 10px;">
+                                            <label style="font-size: 12px; font-weight: bold; color: #475569;">Puntuación (0-100)</label>
+                                            <input type="number" name="puntuacion" min="0" max="100" step="0.1" value="{{ notas[entrega.ID_Estudiante].Puntuacion if entrega.ID_Estudiante in notas else '' }}" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 14px; margin-top: 5px;">
+                                        </div>
+                                        <div style="margin-bottom: 15px;">
+                                            <label style="font-size: 12px; font-weight: bold; color: #475569;">Retroalimentación para el alumno</label>
+                                            <textarea name="retroalimentacion" rows="3" placeholder="Ej. ¡Excelente trabajo! Solo faltó detallar el paso 2..." style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 13px; margin-top: 5px; resize: vertical;">{{ notas[entrega.ID_Estudiante].Retroalimentacion if entrega.ID_Estudiante in notas else '' }}</textarea>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <button type="submit" style="background-color: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;"><i class="fa-solid fa-floppy-disk"></i> Guardar Calificación</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div style="text-align: center; padding: 30px 10px; color: #94a3b8;">
+                                <i class="fa-solid fa-inbox" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+                                <p style="font-size: 14px;">Aún no hay entregas para esta tarea.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+            
+        </div>
+    </main>
+    <script>
+        function toggleModificarEntrega() {
+            var form = document.getElementById('form-modificar');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
+
+    <script>
+    function toggleCalificar(idEstudiante) {
+            var form = document.getElementById('form-calificar-' + idEstudiante);
+            form.style.display = (form.style.display === 'none') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

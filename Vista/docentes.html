@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Módulo Docentes - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Mismo CSS responsivo para mantener consistencia */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            height: 100vh;
+            color: #334155;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: #0284c7;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-category {
+            display: block;
+            padding: 0 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin: 15px 0 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .menu-item.active {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-right: 4px solid #0284c7;
+            font-weight: 600;
+        }
+
+        .menu-item:hover:not(.active) {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .top-navbar {
+            height: 70px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            flex-shrink: 0;
+        }
+
+        .top-navbar h1 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #0284c7;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .module-workspace {
+            padding: 30px;
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header-text h3 {
+            font-size: 17px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .card-header-text p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .card-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-bar input:focus {
+            border-color: #0284c7;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+            transition: background 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #0284c7;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0369a1;
+        }
+
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f8fafc;
+        }
+
+        .table-responsive {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th {
+            background-color: #f8fafc;
+            text-align: left;
+            padding: 14px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            border-bottom: 1px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 14px 20px;
+            font-size: 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .student-name {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: #0f172a;
+        }
+
+        .student-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #e2e8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+
+        .action-container {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-table-action {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid;
+            border-radius: 4px;
+            cursor: pointer;
+            background: transparent;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-edit {
+            color: #0284c7;
+            border-color: #0284c7;
+        }
+
+        .action-edit:hover {
+            background-color: #f0f9ff;
+        }
+
+        .action-delete {
+            color: #dc2626;
+            border-color: #dc2626;
+        }
+
+        .action-delete:hover {
+            background-color: #fef2f2;
+        }
+
+        .form-max-width {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 11px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #0284c7;
+        }
+
+        .btn-logout {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+            margin-left: 15px;
+        }
+
+        .btn-logout:hover {
+            background-color: #fca5a5;
+        }
+
+        @media (max-width: 950px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid #e2e8f0;
+                flex-shrink: 0;
+            }
+
+            .sidebar-menu {
+                display: flex;
+                flex-direction: row;
+                overflow-x: auto;
+                white-space: nowrap;
+                padding: 10px 20px;
+                gap: 5px;
+            }
+
+            .menu-category {
+                display: none;
+            }
+
+            .menu-item {
+                border-right: none !important;
+                border-radius: 6px;
+                padding: 10px 15px;
+            }
+
+            .main-content {
+                overflow: visible;
+            }
+
+            .top-navbar {
+                padding: 15px 20px;
+                height: auto;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .module-workspace {
+                padding: 15px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+
+            .search-bar button,
+            .card-header button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-house"></i> Menú Principal</a>
+
+            <span class="menu-category">Usuarios</span>
+            <a href="/estudiantes" class="menu-item"><i class="fa-solid fa-user-graduate"></i> Estudiantes</a>
+            <a href="/docentes" class="menu-item"><i class="fa-solid fa-chalkboard-user"></i> Docentes</a>
+
+            <span class="menu-category">Gestión Escolar</span>
+            <a href="/grupos" class="menu-item"><i class="fa-solid fa-users-rectangle"></i> Grupos</a>
+
+            <span class="menu-category">Académico</span>
+            <a href="/tareas" class="menu-item"><i class="fa-solid fa-book-open"></i> Tareas</a>
+            <a href="/actividades" class="menu-item"><i class="fa-solid fa-puzzle-piece"></i> Actividades</a>
+
+            {% if session['rol'] == 'Estudiante' %}
+                <span class="menu-category">EVALUACIÓN</span>
+                <a href="/calificaciones" class="menu-item"><i class="fa-solid fa-star"></i> Calificaciones</a>
+            {% endif %}
+
+            {% if session['rol'] != 'Administrador' %}
+                <span class="menu-category">COMUNICACIÓN</span>
+                <a href="/chat" class="menu-item"><i class="fa-solid fa-comments"></i> Chat</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1 id="page-nav-title">Gestión de Docentes</h1>
+            <div class="user-profile">
+                <a href="/perfil" style="text-decoration: none; color: inherit;">
+                    <span>{{ session['nombre'] }} ({{ session['rol'] }})</span>
+                </a>
+
+                <a href="/perfil" class="avatar" style="overflow: hidden; text-decoration: none;">
+                    {% if session.get('foto') %}
+                    <img src="{{ url_for('static', filename='uploads/perfiles/' + session['foto']) }}" alt="Perfil"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    {{ session['nombre'][0] }}
+                    {% endif %}
+                </a>
+
+                <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </div>
+        </header>
+
+        <div class="module-workspace">
+
+            <section class="card" id="view-list">
+                <div class="card-header">
+                    <div class="card-header-text">
+                        <h3>Plantilla Docente</h3>
+                        <p>Visualización y búsqueda de maestros registrados</p>
+                    </div>
+                    {% if session['rol'] == 'Administrador' %}
+                    <button class="btn btn-primary" onclick="showRegistrationView()">
+                        <i class="fa-solid fa-user-plus"></i> Registrar Docente
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <form action="/docentes" method="GET" class="search-bar">
+                        <input type="text" name="buscar" placeholder="Buscar por nombre o número de empleado...">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                        </button>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>No. Empleado</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Descripción / Perfil</th>
+
+                                    <!-- SOLO EL ADMIN VE EL ENCABEZADO DE ACCIONES -->
+                                    {% if session['rol'] == 'Administrador' %}
+                                    <th>Acciones</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if docentes %}
+                                {% for docente in docentes %}
+                                <tr>
+                                    <td><strong>{{ docente.usuario.Matricula }}</strong></td>
+                                    <td>
+                                        <div class="student-name">
+                                            <div class="student-avatar" style="overflow: hidden;">
+                                                {% if docente.usuario.FotoPerfil %}
+                                                <img src="{{ url_for('static', filename='uploads/perfiles/' + docente.usuario.FotoPerfil) }}"
+                                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                                {% else %}
+                                                {{ docente.usuario.NombreCompleto[0] }}
+                                                {% endif %}
+                                            </div>
+                                            {{ docente.usuario.NombreCompleto }}
+                                        </div>
+                                        <span style="font-size: 12px; color: #64748b;">{{ docente.usuario.Correo
+                                            }}</span>
+                                    </td>
+                                    <td style="color: #64748b;">{{ docente.Descripcion or 'Sin descripción' }}</td>
+
+                                    <!-- SOLO EL ADMIN VE ESTOS BOTONES -->
+                                    {% if session['rol'] == 'Administrador' %}
+                                    <td>
+                                        <div class="action-container">
+                                            <a href="/docentes/modificar/{{ docente.ID_Docente }}"
+                                                class="btn-table-action action-edit">Modificar</a>
+                                            <a href="/docentes/baja/{{ docente.ID_Docente }}"
+                                                class="btn-table-action action-delete"
+                                                onclick="return confirm('¿Seguro que deseas dar de baja a este docente?');">Baja</a>
+                                        </div>
+                                    </td>
+                                    {% endif %}
+
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 40px; color: #64748b;">No hay
+                                        docentes registrados en el sistema.</td>
+                                </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="card" id="view-register" style="display: none;">
+                <div class="card-header">
+                    <div class="card-header-text">
+                        <h3>Registrar Nuevo Docente</h3>
+                        <p>Completa la información del maestro</p>
+                    </div>
+                    {% if session['rol'] == 'Administrador' %}
+                    <button class="btn btn-primary" onclick="showRegistrationView()">
+                        <i class="fa-solid fa-user-plus"></i> Registrar Docente
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <div class="form-max-width">
+                        <form action="/docentes/registrar" method="POST">
+                            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Nombre(s)</label>
+                                    <input type="text" name="nombres" placeholder="Ej. Diego Alfredo" required>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Apellido Paterno</label>
+                                    <input type="text" name="apellido_paterno" placeholder="Ej. Velázquez" required>
+                                </div>
+                                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                                    <label>Apellido Materno</label>
+                                    <input type="text" name="apellido_materno" placeholder="Ej. Delgado">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Número de Empleado / Matrícula</label>
+                                <input type="text" name="matricula" placeholder="Ej. D2024001" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Correo Institucional</label>
+                                <input type="email" name="correo" placeholder="docente@itleon.mx" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña de Acceso</label>
+                                <input type="password" name="contrasena" placeholder="Asignar contraseña temporal"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label>Descripción / Perfil Académico</label>
+                                <textarea name="descripcion" rows="3"
+                                    placeholder="Ej. Especialista en Álgebra Lineal y Ecuaciones Diferenciales"
+                                    maxlength="200"></textarea>
+                            </div>
+
+                            <div style="display: flex; gap: 15px; margin-top: 30px; justify-content: flex-end;">
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="showListView()">Cancelar</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i>
+                                    Guardar Docente</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        function showRegistrationView() {
+            document.getElementById('view-list').style.display = 'none';
+            document.getElementById('view-register').style.display = 'flex';
+            document.getElementById('page-nav-title').innerText = 'Registro de Docentes';
+        }
+
+        function showListView() {
+            document.getElementById('view-register').style.display = 'none';
+            document.getElementById('view-list').style.display = 'flex';
+            document.getElementById('page-nav-title').innerText = 'Gestión de Docentes';
+        }
+    </script>
+</body>
+
+</html>

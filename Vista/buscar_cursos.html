@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscar Cursos - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f1f5f9; padding: 40px; margin: 0;}
+        .search-container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 30px; }
+        .search-bar input { flex: 1; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; outline: none; }
+        .search-bar button { background: #0284c7; color: white; border: none; padding: 0 25px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .curso-list-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; }
+        .btn-unirse { background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <h2><a href="/dashboard" style="color: #64748b; text-decoration: none; margin-right: 15px;"><i class="fa-solid fa-arrow-left"></i></a> Buscador de Grupos</h2>
+        <p style="color: #64748b; margin-bottom: 20px;">Busca por nombre de materia para encontrar tu clase.</p>
+        
+        <form action="/buscar_cursos" method="GET" class="search-bar">
+            <input type="text" name="q" placeholder="Ej. Cálculo Diferencial">
+            <button type="submit">Buscar</button>
+        </form>
+
+        <div id="resultados">
+            {% if grupos %}
+                {% for grupo in grupos %}
+                    <div class="curso-list-item">
+                        <div>
+                            <h4 style="margin: 0; color: #0f172a;">{{ grupo.Nombre }}</h4>
+                            <p style="margin: 5px 0 0; font-size: 13px; color: #64748b;">Prof. {{ grupo.docente.usuario.NombreCompleto }} | {{ grupo.Horario }}</p>
+                        </div>
+                        <button class="btn-unirse" onclick="solicitarCodigo('{{ grupo.ID_Grupo }}')">Unirme</button>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; color: #94a3b8; padding: 20px;">No se encontraron grupos con ese nombre.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function solicitarCodigo(idGrupo) {
+            let codigo = prompt("Por favor, ingresa el código de invitación proporcionado por tu profesor:");
+            
+            if (codigo != null && codigo.trim() !== "") {
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/unirse_curso';
+                
+                let inputId = document.createElement('input');
+                inputId.type = 'hidden';
+                inputId.name = 'id_grupo';
+                inputId.value = idGrupo;
+                
+                let inputCodigo = document.createElement('input');
+                inputCodigo.type = 'hidden';
+                inputCodigo.name = 'codigo_invitacion';
+                inputCodigo.value = codigo.trim();
+                
+                form.appendChild(inputId);
+                form.appendChild(inputCodigo);
+                document.body.appendChild(form);
+                
+                form.submit();
+            }
+        }
+    </script>
+</body>
+</html>

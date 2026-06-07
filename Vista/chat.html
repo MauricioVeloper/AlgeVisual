@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mensajes - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            height: 100vh;
+            color: #334155;
+            overflow: hidden;
+        }
+
+        /* Layout Principal */
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: #0284c7;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-category {
+            display: block;
+            padding: 0 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin: 15px 0 6px 0;
+            text-transform: uppercase;
+        }
+
+        .menu-item {
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .menu-item.active {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-right: 4px solid #0284c7;
+            font-weight: 600;
+        }
+
+        .menu-item:hover:not(.active) {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .top-navbar {
+            height: 70px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            flex-shrink: 0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #0284c7;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            overflow: hidden;
+        }
+
+        .btn-logout {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            margin-left: 15px;
+        }
+
+        /* Módulo Chat */
+        .chat-container {
+            display: flex;
+            height: calc(100vh - 70px);
+            background: #f8fafc;
+        }
+
+        .chat-sidebar {
+            width: 320px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .chat-contact {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .chat-contact:hover,
+        .chat-contact.active {
+            background: #f0f9ff;
+        }
+
+        .chat-contact-info h4 {
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 3px;
+        }
+
+        .chat-contact-info p {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .chat-window {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: #f1f5f9;
+            position: relative;
+        }
+
+        .chat-window-header {
+            height: 70px;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+            gap: 15px;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .msg-bubble {
+            max-width: 60%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.4;
+            position: relative;
+            padding-right: 30px;
+            /* Espacio para la flechita */
+        }
+
+        .msg-recibido {
+            background: #ffffff;
+            color: #334155;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .msg-enviado {
+            background: #0284c7;
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        /* Estilos del menú de opciones (Tipo WhatsApp) */
+        .msg-options {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+        }
+
+        .msg-bubble:hover .msg-options {
+            display: block;
+        }
+
+        /* Solo se muestra al pasar el mouse */
+
+        .msg-options-btn {
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+
+        .msg-options-btn:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .msg-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 25px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            min-width: 100px;
+            overflow: hidden;
+        }
+
+        .msg-dropdown.show {
+            display: block;
+        }
+
+        .msg-dropdown-item {
+            padding: 10px 15px;
+            font-size: 13px;
+            color: #334155;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            width: 100%;
+            text-align: left;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .msg-dropdown-item:hover {
+            background: #f1f5f9;
+        }
+
+        .msg-recibido {
+            background: #ffffff;
+            color: #334155;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .msg-enviado {
+            background: #0284c7;
+            color: #ffffff;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-input-area {
+            background: #ffffff;
+            padding: 20px 30px;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-input-area input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .chat-input-area input:focus {
+            border-color: #0284c7;
+        }
+
+        .btn-send {
+            background: #0284c7;
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .btn-send:hover {
+            background: #0369a1;
+        }
+
+        select.new-chat-select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 10px;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-house"></i> Menú Principal</a>
+            <span class="menu-category">Gestión Escolar</span>
+            <a href="/grupos" class="menu-item"><i class="fa-solid fa-users-rectangle"></i> Grupos</a>
+
+            <span class="menu-category">Comunicación</span>
+            <a href="/chat" class="menu-item active"><i class="fa-solid fa-comments"></i> Chat</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1>Mensajes Directos</h1>
+            <div class="user-profile">
+                <a href="/perfil" class="avatar">
+                    {% if session.get('foto') %}
+                    <img src="{{ url_for('static', filename='uploads/perfiles/' + session['foto']) }}"
+                        style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                    {{ session['nombre'][0] }}
+                    {% endif %}
+                </a>
+                <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </div>
+        </header>
+
+        <div class="chat-container">
+            <div class="chat-sidebar">
+                <div class="chat-header">
+                    <form action="" method="GET" id="form-nuevo-chat">
+                        <select class="new-chat-select" onchange="iniciarChat(this.value)">
+                            <option value="" selected disabled>+ Iniciar nuevo chat...</option>
+                            {% for u in todos_usuarios %}
+                            <option value="{{ u.ID_Usuario }}">{{ u.NombreCompleto }} ({{ u.Rol }})</option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+
+                <div class="chat-list">
+                    {% if contactos %}
+                    {% for contacto in contactos %}
+                    <a href="/chat/{{ contacto.ID_Usuario }}"
+                        class="chat-contact {% if chat_actual and chat_actual.ID_Usuario == contacto.ID_Usuario %}active{% endif %}">
+                        <div class="avatar" style="width: 40px; height: 40px; flex-shrink: 0;">
+                            {% if contacto.FotoPerfil %}
+                            <img src="{{ url_for('static', filename='uploads/perfiles/' + contacto.FotoPerfil) }}"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                            {{ contacto.NombreCompleto[0] }}
+                            {% endif %}
+                        </div>
+                        <div class="chat-contact-info">
+                            <h4>{{ contacto.NombreCompleto }}</h4>
+                            <p>{{ contacto.Rol }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <p style="text-align: center; padding: 20px; color: #94a3b8; font-size: 13px;">No tienes
+                        conversaciones activas.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="chat-window">
+                {% if chat_actual %}
+                <div class="chat-window-header">
+                    <div class="avatar" style="width: 40px; height: 40px;">
+                        {% if chat_actual.FotoPerfil %}
+                        <img src="{{ url_for('static', filename='uploads/perfiles/' + chat_actual.FotoPerfil) }}"
+                            style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                        {{ chat_actual.NombreCompleto[0] }}
+                        {% endif %}
+                    </div>
+                    <div>
+                        <h3 style="font-size: 16px; color: #0f172a;">{{ chat_actual.NombreCompleto }}</h3>
+                        <p style="font-size: 12px; color: #64748b;">{{ chat_actual.Rol }}</p>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="caja-mensajes">
+                    {% if conversacion %}
+                    {% for msg in conversacion %}
+                    <div
+                        class="msg-bubble {% if msg.ID_Remitente == session['usuario_id'] %}msg-enviado{% else %}msg-recibido{% endif %}">
+                        <span id="texto-msg-{{ msg.ID_Mensaje }}">{{ msg.Contenido }}</span>
+
+                        {% if msg.ID_Remitente == session['usuario_id'] %}
+                        <div class="msg-options">
+                            <button class="msg-options-btn" onclick="toggleMenu('menu-{{ msg.ID_Mensaje }}')">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+
+                            <div class="msg-dropdown" id="menu-{{ msg.ID_Mensaje }}">
+                                <button class="msg-dropdown-item"
+                                    onclick="editarMensaje('{{ msg.ID_Mensaje }}')">Editar</button>
+
+                                <form action="/chat/eliminar/{{ msg.ID_Mensaje }}" method="POST" style="margin:0;">
+                                    <button type="submit" class="msg-dropdown-item" style="color: #dc2626;"
+                                        onclick="return confirm('¿Eliminar este mensaje para todos?');">Eliminar</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p style="text-align: center; color: #94a3b8; padding: 20px;">No hay mensajes en esta conversación.
+                        ¡Empieza a chatear!</p>
+                    {% endif %}
+                </div>
+
+                <form class="chat-input-area" action="/chat/enviar" method="POST">
+                    <input type="hidden" name="id_destinatario" value="{{ chat_actual.ID_Usuario }}">
+                    <input type="text" name="contenido" placeholder="Escribe un mensaje..." required autocomplete="off"
+                        autofocus>
+                    <button type="submit" class="btn-send"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+                {% else %}
+                <div
+                    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #94a3b8;">
+                    <i class="fa-regular fa-comments" style="font-size: 80px; margin-bottom: 20px; opacity: 0.5;"></i>
+                    <h2>AlgeVisual Chat</h2>
+                    <p>Selecciona un contacto o inicia un nuevo chat.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Redirige al seleccionar un nuevo chat del menú desplegable
+        function iniciarChat(idUsuario) {
+            if (idUsuario) {
+                window.location.href = '/chat/' + idUsuario;
+            }
+        }
+
+        // Auto-scroll al final de los mensajes
+        const cajaMensajes = document.getElementById('caja-mensajes');
+        if (cajaMensajes) {
+            cajaMensajes.scrollTop = cajaMensajes.scrollHeight;
+        }
+
+        // 1. Mostrar/Ocultar el menú del mensaje
+        function toggleMenu(menuId) {
+            // Cierra cualquier otro menú que esté abierto
+            document.querySelectorAll('.msg-dropdown').forEach(m => {
+                if(m.id !== menuId) m.classList.remove('show');
+            });
+            document.getElementById(menuId).classList.toggle('show');
+        }
+
+        // 2. Cerrar los menús al hacer clic en cualquier parte de la pantalla
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.msg-options')) {
+                document.querySelectorAll('.msg-dropdown').forEach(m => m.classList.remove('show'));
+            }
+        });
+
+        // 3. Lógica para editar el mensaje usando un prompt rápido
+        function editarMensaje(idMensaje) {
+            let textoActual = document.getElementById('texto-msg-' + idMensaje).innerText;
+            let nuevoTexto = prompt("Edita tu mensaje:", textoActual);
+            
+            // Verificamos que no esté vacío y que sí haya cambiado
+            if (nuevoTexto != null && nuevoTexto.trim() !== "" && nuevoTexto !== textoActual) {
+                // Creamos un formulario invisible para mandarlo a Python
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/chat/editar/' + idMensaje;
+                
+                let inputContenido = document.createElement('input');
+                inputContenido.type = 'hidden';
+                inputContenido.name = 'nuevo_contenido';
+                inputContenido.value = nuevoTexto.trim();
+                
+                form.appendChild(inputContenido);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</body>
+
+</html>

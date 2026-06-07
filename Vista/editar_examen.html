@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Examen - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; padding: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .card { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; margin-top: 5px; font-size: 14px; }
+        .btn { padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;}
+        .btn-blue { background: #0284c7; color: white; }
+        .btn-green { background: #16a34a; color: white; width: 100%; justify-content: center; font-size: 16px; padding: 15px; }
+        .btn-outline { background: white; color: #475569; border: 1px dashed #94a3b8; }
+        .opcion-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 style="color: #0f172a;"><i class="fa-solid fa-pen-to-square" style="color: #0284c7;"></i> Editando Examen</h1>
+                <p style="color: #64748b;">Materia: {{ actividad.grupo.Nombre }}</p>
+            </div>
+            <a href="/grupo/{{ actividad.ID_Grupo }}" class="btn btn-outline"><i class="fa-solid fa-xmark"></i> Cancelar</a>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">Configuración General</h3>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div style="flex: 2; min-width: 250px;">
+                    <label>Título del Examen</label>
+                    <input type="text" id="ex-titulo" value="{{ actividad.Titulo }}" required>
+                </div>
+                <div style="flex: 1; min-width: 150px;">
+                    <label>Tiempo (Minutos)</label>
+                    <input type="number" id="ex-tiempo" value="{{ actividad.TiempoMinutos }}" min="1" required>
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label>Fecha y Hora Límite</label>
+                    <input type="datetime-local" id="ex-limite" value="{{ actividad.FechaLimite.strftime('%Y-%m-%dT%H:%M') if actividad.FechaLimite else '' }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div id="preguntas-container"></div>
+
+        <button class="btn btn-outline" style="width: 100%; justify-content: center; padding: 15px; margin-bottom: 30px;" onclick="agregarPregunta()">
+            <i class="fa-solid fa-plus"></i> Añadir Nueva Pregunta
+        </button>
+
+        <button class="btn btn-green" onclick="guardarActualizacion()">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios del Examen
+        </button>
+    </div>
+
+    <script type="application/json" id="examen-data" data-actividad="{{ actividad.ID_Actividad }}" data-grupo="{{ actividad.ID_Grupo }}">
+        [
+            {% for preg in actividad.preguntas %}
+            {
+                "texto": {{ preg.TextoPregunta | tojson }},
+                "opciones": [
+                    {% for op in preg.opciones %}
+                        {{ op.TextoOpcion | tojson }}{% if not loop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                "correctaIndex": {% set ns = namespace(correcta=0) %}{% for op in preg.opciones %}{% if op.EsCorrecta %}{% set ns.correcta = loop.index0 %}{% endif %}{% endfor %}{{ ns.correcta }}
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
+
+    <script>
+        let preguntas = [];
+        
+        // Obtenemos los IDs desde las propiedades data del script oculto
+        const examDataEl = document.getElementById('examen-data');
+        const idActividad = examDataEl.dataset.actividad;
+        const idGrupo = examDataEl.dataset.grupo;
+        
+        // Leemos el JSON oculto
+        try {
+            const dataText = examDataEl.textContent;
+            if(dataText.trim().length > 0) {
+                preguntas = JSON.parse(dataText);
+            }
+        } catch(e) {
+            console.error("Error al cargar las preguntas:", e);
+        }
+
+        // Si no había preguntas (error raro), ponemos una vacía
+        if(preguntas.length === 0) agregarPregunta();
+        else renderizar();
+
+        function agregarPregunta() {
+            preguntas.push({ texto: "", opciones: ["", ""], correctaIndex: 0 });
+            renderizar();
+        }
+
+        function agregarOpcion(pIndex) {
+            preguntas[pIndex].opciones.push("");
+            renderizar();
+        }
+
+        function actualizarDatos() {
+            preguntas.forEach((p, pIndex) => {
+                p.texto = document.getElementById(`p-${pIndex}-texto`).value;
+                p.opciones.forEach((op, oIndex) => {
+                    p.opciones[oIndex] = document.getElementById(`p-${pIndex}-o-${oIndex}`).value;
+                });
+                let radios = document.getElementsByName(`correcta-${pIndex}`);
+                for (let i = 0; i < radios.length; i++) {
+                    if (radios[i].checked) p.correctaIndex = i;
+                }
+            });
+        }
+
+        function renderizar() {
+            const container = document.getElementById('preguntas-container');
+            container.innerHTML = '';
+
+            preguntas.forEach((p, pIndex) => {
+                let htmlOpciones = '';
+                p.opciones.forEach((op, oIndex) => {
+                    htmlOpciones += `
+                        <div class="opcion-row">
+                            <input type="radio" name="correcta-${pIndex}" value="${oIndex}" ${p.correctaIndex === oIndex ? 'checked' : ''}>
+                            <input type="text" id="p-${pIndex}-o-${oIndex}" placeholder="Escribe el inciso..." value="${op}">
+                        </div>
+                    `;
+                });
+
+                container.innerHTML += `
+                    <div class="card" style="border-left: 4px solid #0284c7;">
+                        <label style="font-weight: bold; color: #0284c7;">Pregunta ${pIndex + 1}</label>
+                        <textarea id="p-${pIndex}-texto" rows="2" placeholder="Escribe tu pregunta aquí...">${p.texto}</textarea>
+                        
+                        <div style="margin-top: 20px;">
+                            <label style="font-size: 13px; color: #64748b;">Selecciona el botón circular del inciso correcto:</label>
+                            ${htmlOpciones}
+                        </div>
+                        
+                        <button class="btn btn-outline" style="margin-top: 15px; font-size: 12px; padding: 6px 12px;" onclick="actualizarDatos(); agregarOpcion(${pIndex})">
+                            <i class="fa-solid fa-plus"></i> Añadir otro inciso
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function guardarActualizacion() {
+            actualizarDatos();
+            const titulo = document.getElementById('ex-titulo').value;
+            const tiempo = document.getElementById('ex-tiempo').value;
+            const fecha_limite = document.getElementById('ex-limite').value;
+
+            if(!titulo || !fecha_limite || preguntas.length === 0) {
+                alert("Error: Debes poner un título, la fecha límite y al menos una pregunta."); return;
+            }
+
+            const payload = { titulo, tiempo, fecha_limite, preguntas };
+
+            try {
+                const response = await fetch(`/api/actividad/${idActividad}/actualizar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(response.ok) {
+                    window.location.href = `/grupo/${idGrupo}`;
+                } else {
+                    const dataError = await response.json();
+                    alert("No se pudo actualizar. Detalle: " + dataError.error);
+                }
+            } catch(error) {
+                alert("Error de red: No se pudo conectar con Python.");
+            }
+        }
+    </script>
+</body>
+</html>

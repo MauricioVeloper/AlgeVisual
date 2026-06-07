@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Tareas - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* Estilos base (Igual a tu dashboard) */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; display: flex; height: 100vh; color: #334155; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; flex-shrink: 0; }
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid #e2e8f0; text-align: center; }
+        .sidebar-header i { font-size: 32px; color: #0284c7; margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; color: #0f172a; font-weight: 700; }
+        .sidebar-menu { padding: 10px 0; flex-grow: 1; overflow-y: auto; }
+        .menu-category { display: block; padding: 0 24px; font-size: 11px; font-weight: 700; color: #94a3b8; margin: 15px 0 6px 0; text-transform: uppercase; }
+        .menu-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: #64748b; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s; }
+        .menu-item.active { background-color: #f0f9ff; color: #0284c7; border-right: 4px solid #0284c7; font-weight: 600; }
+        .menu-item:hover:not(.active) { background-color: #f8fafc; color: #0f172a; }
+        .menu-item i { width: 20px; text-align: center; font-size: 16px; }
+        
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .top-navbar { height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
+        .user-profile { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 500; color: #475569; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; background-color: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; overflow: hidden; }
+        .btn-logout { background-color: #fee2e2; color: #dc2626; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px; margin-left: 15px; }
+
+        .content-area { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        .task-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; border-left: 4px solid #0284c7;}
+        .task-card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.05); transform: translateX(5px); }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-house"></i> Menú Principal</a>
+            <span class="menu-category">Académico</span>
+            <a href="/tareas" class="menu-item active"><i class="fa-solid fa-book-open"></i> Tareas</a>
+            </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1>Panel Global de Tareas</h1>
+            <div class="user-profile">
+                <a href="/perfil" class="avatar">
+                    {% if session.get('foto') %}
+                        <img src="{{ url_for('static', filename='uploads/perfiles/' + session['foto']) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        {{ session['nombre'][0] }}
+                    {% endif %}
+                </a>
+                <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </div>
+        </header>
+        
+        <div class="content-area">
+            <div style="max-width: 900px; margin: 0 auto;">
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #0f172a;">Pendientes por entregar</h2>
+                </div>
+
+                <form action="/tareas" method="GET" style="display: flex; gap: 10px; margin-bottom: 30px;">
+                    <input type="text" name="buscar" value="{{ criterio }}" placeholder="Buscar tarea por título..." style="flex-grow: 1; padding: 12px 15px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none; font-size: 14px;">
+                    <button type="submit" class="btn btn-primary" style="background-color: #0284c7; border: none; padding: 0 20px; border-radius: 6px; color: white; font-weight: bold; cursor: pointer;"><i class="fa-solid fa-magnifying-glass"></i> Buscar</button>
+                    {% if criterio %}
+                        <a href="/tareas" class="btn btn-secondary" style="background-color: #f1f5f9; color: #64748b; padding: 12px 20px; text-decoration: none; border-radius: 6px; font-weight: bold;">Limpiar</a>
+                    {% endif %}
+                </form>
+                
+                {% if tareas_por_grupo %}
+                    {% for nombre_grupo, tareas in tareas_por_grupo.items() %}
+                        
+                        <div style="margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                            <h3 style="color: #0284c7; font-size: 18px;"><i class="fa-solid fa-chalkboard"></i> {{ nombre_grupo }}</h3>
+                        </div>
+
+                        {% for tarea in tareas %}
+                        <div class="task-card">
+                            <div>
+                                <h3 style="color: #0f172a; font-size: 16px; margin: 0 0 5px 0;">{{ tarea.Titulo }}</h3>
+                                <p style="color: #64748b; font-size: 13px;"><i class="fa-regular fa-clock"></i> Vence: {{ tarea.FechaLimite.strftime('%d/%m/%Y a las %H:%M') }}</p>
+                            </div>
+                            <a href="/tarea/{{ tarea.ID_Tarea }}" style="background: #0284c7; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: 600; border: 1px solid #0284c7; transition: 0.2s;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Tarea</a>
+                        </div>
+                        {% endfor %}
+                        
+                    {% endfor %}
+                {% else %}
+                    <div style="background: white; border: 1px dashed #cbd5e1; padding: 40px; text-align: center; border-radius: 8px; margin-top: 20px;">
+                        {% if criterio %}
+                            <i class="fa-solid fa-magnifying-glass-minus" style="font-size: 40px; color: #94a3b8; margin-bottom: 15px;"></i>
+                            <h3 style="color: #0f172a;">Sin resultados</h3>
+                            <p style="color: #64748b; font-size: 14px;">No se encontraron tareas que coincidan con "{{ criterio }}".</p>
+                        {% else %}
+                            <i class="fa-solid fa-check-double" style="font-size: 40px; color: #16a34a; margin-bottom: 15px;"></i>
+                            <h3 style="color: #0f172a;">¡Todo al día!</h3>
+                            <p style="color: #64748b; font-size: 14px;">No tienes tareas pendientes en tus cursos actuales.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

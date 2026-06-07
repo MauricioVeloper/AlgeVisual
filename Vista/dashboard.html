@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* Mantuve todo tu CSS intacto aquí */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            height: 100vh;
+            color: #334155;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: #0284c7;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-category {
+            display: block;
+            padding: 0 24px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            margin: 15px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .menu-item.active {
+            background-color: #f0f9ff;
+            color: #0284c7;
+            border-right: 4px solid #0284c7;
+        }
+
+        .menu-item:hover:not(.active) {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-navbar {
+            height: 70px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+        }
+
+        .top-navbar h1 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #0284c7;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .content-area {
+            padding: 40px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .welcome-banner {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+            border-radius: 12px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-text h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .welcome-text p {
+            font-size: 15px;
+            opacity: 0.9;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .btn-logout {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+            margin-left: 15px;
+        }
+
+        .btn-logout:hover {
+            background-color: #fca5a5;
+        }
+
+        /* Estilos de Mis Cursos */
+        .seccion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+
+        .btn-outline-green {
+            color: #16a34a;
+            border: 2px solid #16a34a;
+            background: transparent;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .btn-outline-green:hover {
+            background: #f0fdf4;
+        }
+
+        .cursos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .curso-card {
+            background: #fff;
+            border: 2px solid #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            /* Quita el subrayado del enlace */
+            color: inherit;
+            transition: transform 0.2s, box-shadow 0.2s;
+            /* Animación suave */
+            cursor: pointer;
+        }
+
+        .curso-card:hover {
+            transform: translateY(-5px);
+            /* Se eleva un poco */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            /* Sombra más grande */
+            border-color: #0284c7;
+            /* Cambia el borde a azul */
+        }
+
+        .curso-card-header {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid #1e293b;
+        }
+
+        .curso-card-header h4 {
+            margin: 0;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        .curso-card-header p {
+            margin: 5px 0 0;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .curso-card-body {
+            padding: 40px 20px;
+            text-align: center;
+            background: #f8fafc;
+            color: #64748b;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-mostrar-mas {
+            background: transparent;
+            border: 2px solid #1e293b;
+            color: #1e293b;
+            padding: 8px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn-mostrar-mas:hover {
+            background: #f1f5f9;
+        }
+
+        .item-curso-hidden {
+            display: none !important;
+        }
+
+        .item-curso-visible {
+            display: flex !important;
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-house"></i> Menú Principal</a>
+            
+            <span class="menu-category">Usuarios</span>
+            <a href="/estudiantes" class="menu-item"><i class="fa-solid fa-user-graduate"></i> Estudiantes</a>
+            <a href="/docentes" class="menu-item"><i class="fa-solid fa-chalkboard-user"></i> Docentes</a>
+            
+            <span class="menu-category">Gestión Escolar</span>
+            <a href="/grupos" class="menu-item"><i class="fa-solid fa-users-rectangle"></i> Grupos</a>
+            
+            <span class="menu-category">Académico</span>
+            <a href="/tareas" class="menu-item"><i class="fa-solid fa-book-open"></i> Tareas</a>
+            <a href="/actividades" class="menu-item"><i class="fa-solid fa-puzzle-piece"></i> Actividades</a>
+            {% if session['rol'] == 'Estudiante' %}
+                <span class="menu-category">EVALUACIÓN</span>
+                <a href="/calificaciones" class="menu-item"><i class="fa-solid fa-star"></i> Calificaciones</a>
+            {% endif %}
+
+            {% if session['rol'] != 'Administrador' %}
+                <span class="menu-category">COMUNICACIÓN</span>
+                <a href="/chat" class="menu-item"><i class="fa-solid fa-comments"></i> Chat</a>
+            {% endif %}
+        </nav>
+        
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1>Panel de Control</h1>
+            <div class="user-profile">
+                <a href="/perfil" style="text-decoration: none; color: inherit;">
+                    <span>{{ session['nombre'] }} ({{ session['rol'] }})</span>
+                </a>
+                
+                <a href="/perfil" class="avatar" style="overflow: hidden; text-decoration: none;">
+                    {% if session.get('foto') %}
+                        <img src="{{ url_for('static', filename='uploads/perfiles/' + session['foto']) }}" alt="Perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                    {% else %}
+                        {{ session['nombre'][0] }}
+                    {% endif %}
+                </a>
+                
+                <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+            <div class="welcome-banner">
+                <div class="welcome-text">
+                    <h2>Gestión Centralizada AlgeVisual</h2>
+                    <p> ¡Bienvenido a AlgeVisual!
+                        El espacio donde el álgebra por fin cobra sentido. Ya sea que vengas a compartir tu conocimiento
+                        o a dominar los números de una vez por todas, preparamos este entorno para ti. Olvídate de los
+                        enredos: aquí enseñar y aprender es más fácil, dinámico y visual. ¡Que comience la experiencia!
+                    </p>
+                    </p>
+                </div>
+                <i class="fa-solid fa-diagram-project" style="font-size: 100px; opacity: 0.15;"></i>
+            </div>
+            <div class="seccion-header">
+                <h3 style="font-size: 18px; color: #0f172a; font-weight: 700;">
+                    {% if session['rol'] == 'Docente' %}
+                    GRUPOS IMPARTIDOS
+                    {% elif session['rol'] == 'Administrador' %}
+                    TODOS LOS GRUPOS ACTIVOS
+                    {% else %}
+                    MIS CURSOS
+                    {% endif %}
+                </h3>
+
+                {% if session['rol'] == 'Estudiante' or session['rol'] == 'Administrador' %}
+                <a href="/buscar_cursos" class="btn-outline-green">
+                    Buscar más grupos... <i class="fa-solid fa-magnifying-glass"></i>
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="cursos-grid" id="contenedor-cursos">
+                {% if mis_grupos %}
+                {% for grupo in mis_grupos %}
+                <!-- Ahora es una etiqueta <a> para que sea clicable -->
+                <a href="/grupo/{{ grupo.ID_Grupo }}"
+                    class="curso-card item-curso{% if loop.index > 3 %} item-curso-hidden{% endif %}"
+                    style="display: flex;">
+                    <div class="curso-card-header">
+                        <h4>{{ grupo.Nombre }}</h4>
+                        <p>Prof. {{ grupo.docente.usuario.NombreCompleto }}</p>
+                    </div>
+                    <div class="curso-card-body">
+                        <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                            <i class="fa-solid fa-chalkboard" style="font-size: 30px; color: #cbd5e1;"></i>
+                            <span>Entrar al aula</span>
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <p style="color: #64748b; font-style: italic;">Aún no estás inscrito en ningún grupo.</p>
+                {% endif %}
+            </div>
+
+            {% if mis_grupos|length > 3 %}
+            <button class="btn-mostrar-mas" id="btn-mostrar" onclick="mostrarTodosLosCursos()">MOSTRAR MÁS</button>
+            {% endif %}
+
+            <script>
+                function mostrarTodosLosCursos() {
+                    const tarjetas = document.querySelectorAll('.item-curso');
+                    tarjetas.forEach(tarjeta => {
+                        tarjeta.style.display = 'flex';
+                    });
+                    document.getElementById('btn-mostrar').style.display = 'none';
+                }
+            </script>
+        </div>
+    </main>
+</body>
+
+</html>

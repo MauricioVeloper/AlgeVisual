@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ grupo.Nombre }} - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            display: flex;
+            height: 100vh;
+            color: #334155;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: #0284c7;
+            margin-bottom: 10px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .menu-item:hover {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .top-navbar {
+            height: 70px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            flex-shrink: 0;
+        }
+
+        .top-navbar h1 {
+            font-size: 20px;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #0284c7;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            overflow: hidden;
+            text-decoration: none;
+        }
+        
+        .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-logout {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: 0.2s;
+            margin-left: 15px;
+        }
+
+        .content-area {
+            padding: 30px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        /* Banner del Aula */
+        .aula-banner {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 12px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .aula-banner h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .aula-banner p {
+            font-size: 15px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .aula-banner i.bg-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 120px;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .btn-abandonar-curso {
+            position: absolute; 
+            top: 80px; /* <-- Movimos el botón hacia abajo para que no estorbe */
+            right: 25px; 
+            background-color: rgba(220, 38, 38, 0.9); 
+            color: white; 
+            padding: 8px 16px; 
+            border-radius: 6px; 
+            text-decoration: none; 
+            font-size: 13px; 
+            font-weight: 600; 
+            z-index: 10; 
+            transition: background 0.2s;
+        }
+
+        .btn-abandonar-curso:hover {
+            background-color: #b91c1c;
+        }
+
+        .promedio-estudiante-banner {
+            position: absolute; 
+            top: 20px; 
+            right: 25px; 
+            background: rgba(255, 255, 255, 0.1); 
+            border: 1px solid rgba(255,255,255,0.2); 
+            backdrop-filter: blur(5px); 
+            padding: 10px 15px; 
+            border-radius: 8px; 
+            color: white; 
+            font-size: 14px; 
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            z-index: 10;
+        }
+
+        .card-seccion {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Estilos del submenú interno */
+        .aula-nav {
+            display: flex;
+            flex-direction: row; /* <-- Forzamos que siempre estén en horizontal */
+            gap: 20px;
+            border-bottom: 1px solid #cbd5e1;
+            margin-bottom: 25px;
+        }
+
+        .aula-tab {
+            background: transparent;
+            border: none;
+            padding: 10px 15px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .aula-tab.active {
+            color: #0284c7;
+            border-bottom-color: #0284c7;
+        }
+
+        .aula-tab:hover:not(.active) {
+            color: #0f172a;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Botones e Inputs refactorizados */
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 14px;
+            transition: 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary { background-color: #0284c7; color: white; }
+        .btn-primary:hover { background-color: #0369a1; }
+        
+        .btn-secondary { background-color: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background-color: #cbd5e1; }
+
+        .btn-outline {
+            background-color: white; color: #0284c7; border: 1px solid #0284c7; text-align: center; padding: 8px; font-weight: 600; font-size: 13px;
+        }
+        .btn-outline:hover { background-color: #f0f9ff; }
+
+        .btn-action {
+            background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 13px; width: 100%; text-align: center;
+        }
+        .btn-action:hover { background-color: #e2e8f0; }
+
+        .btn-danger {
+            background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 8px; border-radius: 6px; font-weight: 600; font-size: 13px; width: 100%; text-align: center;
+        }
+        .btn-danger:hover { background-color: #fecaca; }
+
+        /* Estilos específicos de Tareas y Formularios (antes en línea) */
+        .form-tarea-container {
+            display: none; 
+            margin-top: 20px; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            border: 1px solid #e2e8f0; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .form-control {
+            width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 13px; color: #475569; font-weight: bold; }
+
+        .tarea-card {
+            padding: 20px; 
+            display: flex; 
+            gap: 20px; 
+            align-items: flex-start; 
+            transition: box-shadow 0.2s;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .tarea-icon {
+            width: 50px; height: 50px; background-color: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+        }
+
+        .tarea-edit-form {
+            flex-grow: 1; display: none; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed #cbd5e1;
+        }
+
+        /* Estilos específicos de Integrantes */
+        .alumno-item {
+            display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding: 15px 10px;
+        }
+
+        .badge { font-weight: bold; font-size: 13px; padding: 6px 12px; border-radius: 20px; }
+        .badge-success { background-color: #dcfce7; color: #16a34a; }
+        .badge-danger { background-color: #fee2e2; color: #dc2626; }
+        .badge-neutral { background-color: #f1f5f9; color: #64748b; }
+
+        /* Media Queries para Responsividad Mínima */
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; justify-content: space-between; align-items: center; padding: 10px; }
+            .sidebar-header { padding: 5px; border: none; }
+            .sidebar-menu { display: none; /* Considerar un menú hamburguesa aquí a futuro */ }
+            .main-content { overflow-y: auto; }
+            .content-area { padding: 15px; }
+            .tarea-card { flex-direction: column; }
+            .top-navbar { padding: 0 15px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-arrow-left"></i> Volver a Mis Cursos</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1>Aula Virtual</h1>
+            <div class="user-profile">
+                <a href="/perfil" style="text-decoration: none; color: inherit;">
+                    <span>{{ session['nombre'] }} ({{ session['rol'] }})</span>
+                </a>
+
+                <a href="/perfil" class="avatar">
+                    {% if session.get('foto') %}
+                    <img src="{{ url_for('static', filename='uploads/perfiles/' + session['foto']) }}" alt="Perfil">
+                    {% else %}
+                    {{ session['nombre'][0] }}
+                    {% endif %}
+                </a>
+
+                <a href="/logout" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+            </div>
+        </header>
+
+        <div class="content-area">
+
+            <div class="aula-banner">
+                <h2>{{ grupo.Nombre }}</h2>
+                <p>
+                    <span><i class="fa-solid fa-chalkboard-user"></i> Prof. {{ grupo.docente.usuario.NombreCompleto }}</span>
+                    <span><i class="fa-regular fa-clock"></i> {{ grupo.Horario }}</span>
+                    <span><i class="fa-solid fa-location-dot"></i> {{ grupo.EspacioFisico }}</span>
+                </p>
+
+                {% if session['rol'] != 'Estudiante' %}
+                <p style="margin-top: 15px; font-weight: bold; color: #fbbc04;">
+                    <i class="fa-solid fa-key"></i> Código de Invitación: {{ grupo.CodigoInvitacion }}
+                </p>
+                {% endif %}
+
+                {% if session['rol'] == 'Estudiante' %}
+                <a href="/grupo/salir/{{ grupo.ID_Grupo }}" class="btn-abandonar-curso"
+                    onclick="return confirm('¿Estás seguro de que deseas abandonar este curso? Perderás el acceso al material y ya no aparecerás en la lista de integrantes.');">
+                    <i class="fa-solid fa-person-walking-arrow-right"></i> Salir del Curso
+                </a>
+                
+                <div class="promedio-estudiante-banner">
+                    <i class="fa-solid fa-graduation-cap" style="color: #38bdf8;"></i> 
+                    Mi Promedio: 
+                    <span>
+                        {{ promedio_alumno if promedio_alumno is not none else 'N/A' }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <i class="fa-solid fa-shapes bg-icon"></i>
+            </div>
+
+            <div class="aula-nav">
+                <button class="aula-tab active" id="btn-muro" onclick="cambiarTab('muro')">Muro de Novedades</button>
+                <button class="aula-tab" id="btn-tareas" onclick="cambiarTab('tareas')">Tareas</button>
+                <button class="aula-tab" id="btn-actividades" onclick="cambiarTab('actividades')">Actividades</button>
+                <button class="aula-tab" id="btn-integrantes" onclick="cambiarTab('integrantes')">Integrantes</button>
+            </div>
+
+            <!-- Pestaña Muro -->
+            <div id="tab-muro" class="tab-content active">
+                <div class="card-seccion">
+                    <h3 style="color: #0f172a; margin-bottom: 15px; font-size: 18px;"><i class="fa-regular fa-comments" style="color: #0284c7;"></i> Publicaciones Recientes</h3>
+                    <p style="color: #64748b; font-size: 14px; text-align: center; padding: 40px;">
+                        Aún no hay anuncios ni publicaciones en el muro.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Pestaña Tareas -->
+            <div id="tab-tareas" class="tab-content">
+                
+                {% if session['rol'] in ['Docente', 'Administrador'] %}
+                <div class="card-seccion" style="background-color: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h3 style="color: #0f172a; font-size: 16px;"><i class="fa-solid fa-plus-circle" style="color: #16a34a;"></i> Nueva Asignación</h3>
+                        <button class="btn btn-primary" onclick="document.getElementById('form-tarea').style.display='block'">Crear Tarea</button>
+                    </div>
+                    
+                    <form id="form-tarea" class="form-tarea-container" action="/grupo/{{ grupo.ID_Grupo }}/tarea/crear" method="POST" enctype="multipart/form-data">
+                        <h4 style="color: #0f172a; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Detalles de la nueva asignación</h4>
+                        
+                        <div class="form-group">
+                            <label>Título de la Tarea <span style="color: #dc2626;">*</span></label>
+                            <input type="text" name="titulo" class="form-control" placeholder="Ej. Ecuaciones de 2do Grado" required maxlength="150">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Instrucciones / Descripción</label>
+                            <textarea name="descripcion" class="form-control" rows="5" placeholder="Escribe las instrucciones detalladas aquí..." style="resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div class="form-group" style="flex: 1; min-width: 250px;">
+                                <label>Fecha y Hora Límite <span style="color: #dc2626;">*</span></label>
+                                <input type="datetime-local" name="fecha_limite" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group" style="flex: 1; min-width: 250px;">
+                                <label>Material de apoyo (Solo .jpg)</label>
+                                <input type="file" name="archivo" class="form-control" accept=".jpg, .jpeg" style="background: #f8fafc; border: 1px dashed #cbd5e1; cursor: pointer;">
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px;">
+                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('form-tarea').style.display='none'">Cancelar</button>
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Publicar Tarea</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+
+                <h3 style="color: #0f172a; font-size: 18px; margin-bottom: 15px;"><i class="fa-solid fa-list-check" style="color: #0284c7;"></i> Tareas del Curso</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px;">
+                    {% if tareas %}
+                        {% for tarea in tareas|sort(attribute='FechaAsignacion', reverse=true) %}
+                        <div class="tarea-card">
+                            <div class="tarea-icon">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                            
+                            <div id="vista-tarea-{{ tarea.ID_Tarea }}" style="flex-grow: 1; display: block;">
+                                <h4 style="color: #0f172a; font-size: 16px; margin-bottom: 5px; display: flex; align-items: center; gap: 10px;">
+                                    {{ tarea.Titulo }}
+                                    {% if session['rol'] == 'Estudiante' and tarea.ID_Tarea in tareas_entregadas_ids %}
+                                        <span class="badge badge-success" style="font-size: 11px;">
+                                            <i class="fa-solid fa-check-circle"></i> Entregada
+                                        </span>
+                                    {% endif %}
+                                </h4>
+                                <p style="color: #64748b; font-size: 13px; margin-bottom: 10px;">
+                                    Publicado el {{ tarea.FechaAsignacion.strftime('%d/%m/%Y') if tarea.FechaAsignacion else 'N/A' }} • 
+                                    <strong>Vence: {{ tarea.FechaLimite.strftime('%d/%m/%Y a las %H:%M') if tarea.FechaLimite else 'Sin límite' }}</strong>
+                                </p>
+                                <p style="color: #334155; font-size: 14px; white-space: pre-wrap;">{{ tarea.Descripcion }}</p>
+                            </div>
+
+                            <div id="edit-tarea-{{ tarea.ID_Tarea }}" class="tarea-edit-form">
+                                <form action="/tarea/{{ tarea.ID_Tarea }}/editar" method="POST">
+                                    <div class="form-group">
+                                        <label>Título</label>
+                                        <input type="text" name="titulo" value="{{ tarea.Titulo }}" class="form-control" required maxlength="150">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Descripción</label>
+                                        <textarea name="descripcion" class="form-control" rows="3" style="resize: vertical;">{{ tarea.Descripcion or '' }}</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fecha Límite</label>
+                                        <input type="datetime-local" name="fecha_limite" value="{{ tarea.FechaLimite.strftime('%Y-%m-%dT%H:%M') if tarea.FechaLimite else '' }}" class="form-control" required>
+                                    </div>
+                                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                        <button type="button" class="btn btn-secondary" onclick="toggleEditarTarea('{{ tarea.ID_Tarea }}')">Cancelar</button>
+                                        <button type="submit" class="btn btn-primary" style="padding: 8px 12px; font-size: 13px;">Guardar Cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px; min-width: 120px;">
+                                <a href="/tarea/{{ tarea.ID_Tarea }}" class="btn btn-outline">
+                                    {% if session['rol'] == 'Estudiante' %}Ver Tarea{% else %}Revisar{% endif %}
+                                </a>
+                                
+                                {% if session['rol'] in ['Docente', 'Administrador'] %}
+                                    <button onclick="toggleEditarTarea('{{ tarea.ID_Tarea }}')" id="btn-edit-{{ tarea.ID_Tarea }}" class="btn btn-action">
+                                        <i class="fa-solid fa-pen"></i> Editar
+                                    </button>
+                                    
+                                    <form action="/tarea/{{ tarea.ID_Tarea }}/eliminar" method="POST" style="margin: 0;">
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta tarea del aula?');">
+                                            <i class="fa-solid fa-trash"></i> Eliminar
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="card-seccion" style="text-align: center; padding: 40px;">
+                            <i class="fa-solid fa-clipboard" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                            <p style="color: #64748b; font-size: 14px;">No se han asignado tareas todavía.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="tab-actividades" class="tab-content">
+                <div class="card-seccion">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                        <h3 style="color: #0f172a; font-size: 18px;"><i class="fa-solid fa-puzzle-piece" style="color: #0284c7;"></i> Actividades Interactivas</h3>
+
+                        {% if session['rol'] in ['Docente', 'Administrador'] %}
+                        <div style="position: relative; display: inline-block;">
+                            <button class="btn btn-primary" onclick="toggleDropdown('drop-actividad')"><i class="fa-solid fa-plus"></i> Crear Actividad <i class="fa-solid fa-caret-down" style="margin-left: 5px;"></i></button>
+                            <div id="drop-actividad" style="display: none; position: absolute; right: 0; background: white; border: 1px solid #cbd5e1; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-top: 5px; z-index: 100; width: 160px; overflow: hidden;">
+                                <a href="/grupo/{{ grupo.ID_Grupo }}/crear_examen" style="display: block; padding: 12px; color: #0f172a; text-decoration: none; font-size: 14px; font-weight: 500; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fa-solid fa-file-signature" style="color: #0284c7; width: 20px;"></i> Examen</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                        {% if actividades %}
+                            {% for act in actividades %}
+                            <div style="padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; gap: 20px; align-items: center; border-left: 4px solid #0284c7; background: #f8fafc;">
+                                <div style="width: 50px; height: 50px; background-color: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+                                    <i class="fa-solid fa-file-signature"></i>
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <h4 style="color: #0f172a; font-size: 16px; margin-bottom: 5px;">{{ act.Titulo }}</h4>
+                                    <p style="color: #64748b; font-size: 13px; margin: 0;">
+                                        <i class="fa-regular fa-clock"></i> Tiempo: {{ act.TiempoMinutos }} min • 
+                                        <strong>Vence: {{ act.FechaLimite.strftime('%d/%m/%Y a las %H:%M') if act.FechaLimite else 'Sin límite' }}</strong>
+                                    </p>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px; min-width: 140px;">
+                                    <a href="/actividad/{{ act.ID_Actividad }}" class="btn btn-outline" style="width: 100%; justify-content: center;">
+                                        {% if session['rol'] == 'Estudiante' %}Iniciar Examen{% else %}Ver Resultados{% endif %}
+                                    </a>
+                                    
+                                    {% if session['rol'] in ['Docente', 'Administrador'] %}
+                                        <a href="/actividad/{{ act.ID_Actividad }}/editar" class="btn btn-action" style="width: 100%; justify-content: center; text-decoration: none;">
+                                            <i class="fa-solid fa-pen"></i> Editar
+                                        </a>
+                                        
+                                        <form action="/actividad/{{ act.ID_Actividad }}/eliminar" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn btn-danger" style="width: 100%; justify-content: center;" onclick="return confirm('¿Estás seguro de eliminar esta actividad del curso?');">
+                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p style="color: #64748b; font-size: 14px; text-align: center; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                                Aún no hay actividades ni exámenes publicados en este curso.
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña Integrantes -->
+            <div id="tab-integrantes" class="tab-content">
+                <div class="card-seccion">
+                    <h3 style="color: #0f172a; margin-bottom: 25px; font-size: 18px;"><i class="fa-solid fa-users" style="color: #0284c7;"></i> Personas en el Curso</h3>
+
+                    <div style="margin-bottom: 30px;">
+                        <h4 style="font-size: 13px; color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase;">Profesor</h4>
+                        <div style="display: flex; align-items: center; gap: 15px; padding: 10px;">
+                            <div class="avatar" style="width: 45px; height: 45px; font-size: 18px;">
+                                {% if grupo.docente.usuario.FotoPerfil %}
+                                <img src="{{ url_for('static', filename='uploads/perfiles/' + grupo.docente.usuario.FotoPerfil) }}" alt="Profesor">
+                                {% else %}
+                                {{ grupo.docente.usuario.NombreCompleto[0] }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <p style="font-weight: 600; color: #0f172a; font-size: 15px;">{{ grupo.docente.usuario.NombreCompleto }}</p>
+                                <p style="font-size: 13px; color: #64748b;">{{ grupo.docente.usuario.Correo }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size: 13px; color: #0284c7; border-bottom: 1px solid #0284c7; padding-bottom: 5px; margin-bottom: 15px; text-transform: uppercase;">
+                            Alumnos Inscritos ({{ integrantes|length }})
+                        </h4>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            {% for alumno in integrantes %}
+                            <div class="alumno-item">
+                                <div style="display: flex; align-items: center; gap: 15px;">
+                                    <div class="avatar" style="width: 40px; height: 40px; background-color: #94a3b8; font-size: 16px;">
+                                        {% if alumno.FotoPerfil %}
+                                            <img src="{{ url_for('static', filename='uploads/perfiles/' + alumno.FotoPerfil) }}" alt="Alumno">
+                                        {% else %}
+                                            {{ alumno.NombreCompleto[0] }}
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <p style="font-weight: 600; color: #0f172a; font-size: 14px;">{{ alumno.NombreCompleto }}</p>
+                                        <p style="font-size: 12px; color: #64748b;">{{ alumno.Correo }}</p>
+                                    </div>
+                                </div>
+                                
+                                {% if session['rol'] in ['Docente', 'Administrador'] %}
+                                    {% set prom = promedios_docente.get(alumno.ID_Usuario) %}
+                                    {% if prom is not none and prom >= 70 %}
+                                        {% set prom_class = 'badge-success' %}
+                                    {% elif prom is not none %}
+                                        {% set prom_class = 'badge-danger' %}
+                                    {% else %}
+                                        {% set prom_class = 'badge-neutral' %}
+                                    {% endif %}
+                                    <div class="badge {{ prom_class }}">
+                                        Promedio: {{ prom if prom is not none else 'N/A' }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                                <p style="font-size: 13px; color: #94a3b8; font-style: italic; padding: 10px;">Aún no hay alumnos unidos a este grupo.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function cambiarTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.aula-tab').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            document.getElementById('btn-' + tabName).classList.add('active');
+        }
+
+        function toggleEditarTarea(idTarea) {
+            const vista = document.getElementById('vista-tarea-' + idTarea);
+            const form = document.getElementById('edit-tarea-' + idTarea);
+            const btnEdit = document.getElementById('btn-edit-' + idTarea);
+            
+            if (vista.style.display === 'none') {
+                vista.style.display = 'block';
+                form.style.display = 'none';
+                btnEdit.style.backgroundColor = '#f1f5f9';
+                btnEdit.style.color = '#475569';
+            } else {
+                vista.style.display = 'none';
+                form.style.display = 'block';
+                btnEdit.style.backgroundColor = '#0284c7';
+                btnEdit.style.color = 'white';
+            }
+        }
+    </script>
+    <script>
+    function toggleDropdown(id) {
+            var drop = document.getElementById(id);
+            drop.style.display = (drop.style.display === 'none') ? 'block' : 'none';
+        }
+    </script>
+</body>
+</html>

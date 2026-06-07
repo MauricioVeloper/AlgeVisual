@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis Actividades - AlgeVisual</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: #f1f5f9; display: flex; height: 100vh; color: #334155; overflow: hidden; }
+        .sidebar { width: 260px; background-color: #ffffff; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; height: 100%; flex-shrink: 0; }
+        .sidebar-header { padding: 25px 20px; border-bottom: 1px solid #e2e8f0; text-align: center; }
+        .sidebar-header i { font-size: 32px; color: #0284c7; margin-bottom: 10px; }
+        .sidebar-header h2 { font-size: 20px; color: #0f172a; font-weight: 700; }
+        .sidebar-menu { padding: 10px 0; flex-grow: 1; overflow-y: auto; }
+        .menu-category { display: block; padding: 0 24px; font-size: 11px; font-weight: 700; color: #94a3b8; margin: 15px 0 6px 0; text-transform: uppercase; }
+        .menu-item { padding: 10px 24px; display: flex; align-items: center; gap: 12px; color: #64748b; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s; }
+        .menu-item.active { background-color: #f0f9ff; color: #0284c7; border-right: 4px solid #0284c7; font-weight: 600; }
+        .menu-item:hover:not(.active) { background-color: #f8fafc; color: #0f172a; }
+        
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+        .top-navbar { height: 70px; background-color: #ffffff; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; flex-shrink: 0; }
+        
+        .content-area { padding: 40px; flex-grow: 1; overflow-y: auto; }
+        .materia-group { margin-bottom: 40px; }
+        .materia-title { color: #0f172a; font-size: 18px; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        
+        .actividad-card { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #0284c7; border-radius: 8px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 20px; transition: 0.2s; }
+        .actividad-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-iniciar { background-color: white; color: #0284c7; border: 1px solid #0284c7; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px; text-decoration: none; transition: 0.2s; }
+        .btn-iniciar:hover { background-color: #f0f9ff; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-square-root-variable"></i>
+            <h2>AlgeVisual</h2>
+        </div>
+        <nav class="sidebar-menu">
+            <a href="/dashboard" class="menu-item"><i class="fa-solid fa-house"></i> Menú Principal</a>
+            
+            {% if session['rol'] == 'Administrador' %}
+                <span class="menu-category">Usuarios</span>
+                <a href="/estudiantes" class="menu-item"><i class="fa-solid fa-user-graduate"></i> Estudiantes</a>
+                <a href="/docentes" class="menu-item"><i class="fa-solid fa-chalkboard-user"></i> Docentes</a>
+                <span class="menu-category">Gestión Escolar</span>
+                <a href="/dashboard" class="menu-item"><i class="fa-solid fa-users-rectangle"></i> Grupos</a>
+            {% endif %}
+
+            <span class="menu-category">Académico</span>
+            <a href="/tareas" class="menu-item"><i class="fa-solid fa-book-open"></i> Tareas</a>
+            <a href="/actividades" class="menu-item active"><i class="fa-solid fa-puzzle-piece"></i> Actividades</a>
+            
+            {% if session['rol'] == 'Estudiante' %}
+                <span class="menu-category">EVALUACIÓN</span>
+                <a href="/calificaciones" class="menu-item"><i class="fa-solid fa-star"></i> Calificaciones</a>
+            {% endif %}
+
+            {% if session['rol'] != 'Administrador' %}
+                <span class="menu-category">COMUNICACIÓN</span>
+                <a href="/chat" class="menu-item"><i class="fa-solid fa-comments"></i> Chat</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-navbar">
+            <h1>Actividades Globales</h1>
+            <a href="/logout" style="background-color: #fee2e2; color: #dc2626; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;"><i class="fa-solid fa-right-from-bracket"></i> Salir</a>
+        </header>
+        
+        <div class="content-area">
+            <div style="max-width: 900px; margin: 0 auto;">
+                
+                {% if actividades_por_grupo %}
+                    {% for grupo, actividades in actividades_por_grupo.items() %}
+                        <div class="materia-group">
+                            <h2 class="materia-title"><i class="fa-solid fa-layer-group" style="color: #0284c7; margin-right: 10px;"></i>{{ grupo }}</h2>
+                            
+                            {% for act in actividades %}
+                            <div class="actividad-card">
+                                <div style="width: 50px; height: 50px; background-color: #e0f2fe; color: #0284c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;">
+                                    <i class="fa-solid fa-file-signature"></i>
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <h3 style="color: #0f172a; font-size: 16px; margin: 0 0 5px 0;">{{ act.Titulo }}</h3>
+                                    <p style="color: #64748b; font-size: 13px; margin: 0;">
+                                        <i class="fa-regular fa-clock"></i> Tiempo: {{ act.TiempoMinutos }} min • 
+                                        <strong>Vence: {{ act.FechaLimite.strftime('%d/%m/%Y a las %H:%M') if act.FechaLimite else 'Sin límite' }}</strong>
+                                    </p>
+                                </div>
+                                <div>
+                                    <a href="/actividad/{{ act.ID_Actividad }}" class="btn-iniciar">
+                                        {% if session['rol'] == 'Estudiante' %}Iniciar Examen{% else %}Revisar{% endif %}
+                                    </a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div style="background: white; border: 1px dashed #cbd5e1; padding: 50px; text-align: center; border-radius: 12px;">
+                        <i class="fa-solid fa-mug-hot" style="font-size: 50px; color: #94a3b8; margin-bottom: 15px;"></i>
+                        <h3 style="color: #0f172a; font-size: 18px;">¡Todo al día!</h3>
+                        <p style="color: #64748b; font-size: 14px; margin-top: 5px;">Por el momento no tienes actividades interactivas pendientes en ninguno de tus cursos.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </main>
+</body>
+</html>

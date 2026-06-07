@@ -1,0 +1,141 @@
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+/* Contenedor principal del Login */
+.login-container {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h1 {
+    color: #1a73e8;
+    margin-bottom: 10px;
+}
+
+.login-container p {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+/* Estilos de los inputs (cajas de texto) */
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box; /* Evita que se salgan del contenedor */
+    font-size: 16px;
+}
+
+/* Botón de entrar */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #1557b0;
+}
+
+/* =========================================
+   ESTILOS PARA EL PANEL DE CONTROL (DASHBOARD)
+   ========================================= */
+
+/* Barra superior */
+.dashboard-header {
+    background-color: #1a73e8;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+}
+
+.btn-cerrar {
+    background-color: #d93025;
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    margin-left: 15px;
+    transition: 0.3s;
+}
+
+.btn-cerrar:hover {
+    background-color: #b32a1f;
+}
+
+/* Contenedor dividido (Menú lateral y Contenido) */
+.dashboard-container {
+    display: flex;
+    height: calc(100vh - 65px);
+    align-items: stretch; /* Evita que se centre como el login */
+}
+
+/* Menú lateral izquierdo */
+.sidebar {
+    width: 250px;
+    background-color: #ffffff;
+    border-right: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    overflow-y: auto;
+}
+
+.sidebar h3 {
+    font-size: 13px;
+    color: #888;
+    text-transform: uppercase;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+.sidebar a {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: #e8f0fe;
+    color: #1a73e8;
+    font-weight: bold;
+}
+
+/* Área de contenido principal */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    background-color: #f4f6f9;
+}
