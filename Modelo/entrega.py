@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
-from sqlalchemy.dialects.mssql import DATETIME
+from sqlalchemy.dialects.mssql import DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy import Column, Integer, String, DateTime
 import datetime
 
 class Entrega(Base):
@@ -11,7 +12,7 @@ class Entrega(Base):
     ID_Tarea = Column(Integer, ForeignKey('Tareas.ID_Tarea'), nullable=False)
     ID_Estudiante = Column(Integer, ForeignKey('Usuarios.ID_Usuario'), nullable=False)
     ArchivoURL = Column(String(255), nullable=False)
-    FechaHoraEntrega = Column(DATETIME, default=datetime.datetime.utcnow)
+    FechaHoraEntrega = Column(DateTime, default=datetime.datetime.utcnow)
     Estado = Column(Boolean, default=True)
 
     # Relaciones

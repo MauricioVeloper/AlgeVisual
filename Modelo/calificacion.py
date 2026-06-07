@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, ForeignKey, DECIMAL, Text
-from sqlalchemy.dialects.mssql import DATETIME
+from sqlalchemy.dialects.mssql import DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy import Column, Integer, String, DateTime
 import datetime
 
 class Calificacion(Base):
@@ -13,7 +14,7 @@ class Calificacion(Base):
     ID_Actividad = Column(Integer, nullable=True)
     Puntuacion = Column(DECIMAL(5,2), nullable=True)
     Retroalimentacion = Column(Text, nullable=True)
-    FechaCalificacion = Column(DATETIME, default=datetime.datetime.utcnow)
+    FechaCalificacion = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relaciones
     estudiante = relationship("Usuario", foreign_keys=[ID_Estudiante])

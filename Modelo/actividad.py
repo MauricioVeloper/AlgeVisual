@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Text
-from sqlalchemy.dialects.mssql import DATETIME
+from sqlalchemy.dialects.mssql import DateTime
 from sqlalchemy.orm import relationship
 from database import Base
+from sqlalchemy import Column, Integer, String, DateTime
 import datetime
 
 class Actividad(Base):
@@ -11,8 +12,8 @@ class Actividad(Base):
     Titulo = Column(String(150), nullable=False)
     Tipo = Column(String(50), default='Examen')
     TiempoMinutos = Column(Integer, nullable=False)
-    FechaPublicacion = Column(DATETIME, default=datetime.datetime.utcnow)
-    FechaLimite = Column(DATETIME, nullable=True)
+    FechaPublicacion = Column(DateTime, default=datetime.datetime.utcnow)
+    FechaLimite = Column(DateTime, nullable=True)
     Estado = Column(Boolean, default=True)
     preguntas = relationship("PreguntaExamen", backref="actividad", cascade="all, delete-orphan")
     grupo = relationship("Grupo", backref="actividades_creadas") # <--- SOLUCIÓN AL ERROR
