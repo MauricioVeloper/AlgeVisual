@@ -1,14 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# 1. Usamos el nombre exacto de tu computadora y servidor
-username = 'sa'
-password = '12345' # Pon tu contraseña real aquí
-server = r'127.0.1,1433' # Asegúrate de usar la IP correcta y el puerto si es necesario
-database = 'AlgeVisual'
-
-# 2. Cambiamos el driver a 'SQL Server' y agregamos TrustServerCertificate=yes
-connection_string = f"mssql+pyodbc://{username}:{password}@{server}/{database}?driver=SQL+Server&TrustServerCertificate=yes"
+# Usamos la DIRECT_URL. 
+# ¡OJO!: Borra [YOUR-PASSWORD] (con todo y corchetes) y pon tu contraseña real.
+connection_string = "postgresql://postgres.qvxlovckqhmuhfnfhppo:@M4rcc3in)( @aws-1-us-west-2.pooler.supabase.com:5432/postgres"
 
 engine = create_engine(connection_string, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
